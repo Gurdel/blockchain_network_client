@@ -1,5 +1,6 @@
 from hashlib import sha256
 import json
+from transaction import Transaction
 
 from typing import List
 
@@ -10,7 +11,7 @@ class Block(dict):
     """
     NONCE = "0"  # Необхідний заголовок хешу блоку для PoW
 
-    def __init__(self, index: int, time: float, transactions: list, proof: int, prev_hash: str):
+    def __init__(self, index: int, time: float, transactions: List[Transaction], proof: int, prev_hash: str):
         """
         Конструктор класу
         :param index: порядковий номер блоку
@@ -43,7 +44,7 @@ class Block(dict):
         self['hash'] = sha256(block_string).hexdigest()
         return self['hash']
 
-    def merkle(self, transaction: list) -> str:
+    def merkle(self, transaction: List[Transaction]) -> str:
         """
         Обраховує та повертає дерево Меркла транзакцій блоку
         :param transaction: транзакції, які зберігаються в блоці
