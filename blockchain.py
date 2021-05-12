@@ -20,7 +20,7 @@ class Blockchain:
         self.nodes = []  # Список адрес інших користувачів мережі
 
         # Створення початкового (генезисного) блоку
-        self.new_block(Block(index=0, time=time(), transactions=[], proof=0, prev_hash=Block.NONCE))
+        self.new_block(Block(index=1, time=time(), transactions=[], proof=0, prev_hash=Block.NONCE))
 
     def add_node(self, link: str):
         """
