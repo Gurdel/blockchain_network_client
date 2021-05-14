@@ -38,7 +38,6 @@ class Block(dict):
         Обраховує та повертає хеш блоку, використовуючи хеш-функцію sha256
         :return: значення хешу блоку
         """
-        # We must make sure that the Dictionary is Ordered, or we'll have inconsistent hashes
         self['hash'] = ''
         block_string = json.dumps(self, sort_keys=True).encode()
         self['hash'] = sha256(block_string).hexdigest()
