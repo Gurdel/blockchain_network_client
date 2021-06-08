@@ -5,11 +5,15 @@ from argparse import ArgumentParser
 from uuid import uuid4
 from flask import Flask, jsonify, request
 import random
+from Crypto.PublicKey import RSA
+from hashlib import sha512
 
 from blockchain import Blockchain
 
 app = Flask(__name__)
 user_id = str(uuid4()).replace('-', '')  # Генерує ідетифікатор клієнта
+print('user_id: ', user_id)
+keyPair = RSA.generate(bits=1024)
 blockchain = Blockchain()
 
 
@@ -30,7 +34,7 @@ def mine():
     # Пошук значення доказу роботи для алгоритма PoW
     proofed_block = None
     while proofed_block is None:
-        proof = random.randint(0, 99999999999999999999999999999999999)
+        proof = random.randint(10000000000000000000000000000000000, 99999999999999999999999999999999999)
         proofed_block = blockchain.proof_of_work(proof)
 
     blockchain.new_block(proofed_block)
@@ -45,8 +49,32 @@ def new_transaction():
     :return: Повідомлення з номером блоку, в який буде додано транзакцію
     """
     transaction = request.get_json()
-    index = blockchain.new_transaction(transaction['sender'], transaction['recipient'], transaction['amount'])
+    message = transaction['message']
+
+    msg_hash = int.from_bytes(sha512(str.encode(message)).digest(), byteorder='big')
+    signature = pow(msg_hash, keyPair.d, keyPair.n)
+
+    index = blockchain.new_transaction(transaction['sender'], transaction['recipient'], transaction['amount'], message,
+                                       signature, (keyPair.e, keyPair.n))
     response = {'message': f'Transaction will be added to Block {index}'}
+    return jsonify(response)
+
+
+@app.route('/transactions/check', methods=['POST'])
+def check_signature():
+    """
+    Перевіряє підпис повідомлення
+    :return: Результат перевірки
+    """
+    transaction = request.get_json()
+    message = str.encode(transaction['message'])
+    key = transaction['key']
+    signature = transaction['signature']
+
+    msg_hash = int.from_bytes(sha512(message).digest(), byteorder='big')
+    sign_hash = pow(signature, key[0], key[1])
+
+    response = {'msg_hash': f'{msg_hash}', 'sign_hash': f'{sign_hash}', 'valid': msg_hash == sign_hash}
     return jsonify(response)
 
 

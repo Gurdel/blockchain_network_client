@@ -88,19 +88,26 @@ class Blockchain:
         self.chain.append(block)
         return block
 
-    def new_transaction(self, sender: str, recipient: str, quantity: float):
+    def new_transaction(self, sender: str, recipient: str, quantity: float, message: str = '', signature: str = '',
+                        key: tuple = (0, 0)):
         """
         Додає нову транзакцію
         :param sender: відправник
         :param recipient: отримувач
         :param quantity: кількість умовних одиниць
+        :param message: повідомлення транзакції
+        :param signature: підпис повідомлення користувачем, який створив транзакцію
+        :param key: публічний ключ користувача, який підписав транзакцію
         :return: індекс блоку, до якого буде додана транзакція
         """
         self.current_transactions.append(
             Transaction(
                 sender=sender,
                 recipient=recipient,
-                quantity=quantity
+                quantity=quantity,
+                message=message,
+                signature=signature,
+                key=key,
             ))
 
         return self.chain[-1]['index'] + 1
